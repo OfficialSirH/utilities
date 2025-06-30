@@ -5,9 +5,11 @@ const decoder = new TextDecoder();
 export const StringType: IType<string, null> = {
 	serialize(buffer, value) {
 		const encoded = encoder.encode(value);
-		buffer.writeInt16(encoded.length);
+		buffer.writeUint8(byteOffset, encoded.length);
+		byteOffset += 1;
 		for (const byte of encoded) {
-			buffer.writeInt8(byte);
+			buffer.writeUint8(byteOffset, byte);
+			byteOffset += 1;
 		}
 	},
 	deserialize(buffer, pointer) {

@@ -3,7 +3,6 @@ import type { PointerLike } from '../shared/Pointer';
 export interface DuplexBuffer {
 	at(index: number): number | undefined;
 
-	get maxLength(): number;
 	get maxBitLength(): number;
 	get length(): number;
 	get bitLength(): number;
@@ -41,5 +40,5 @@ export interface DuplexBuffer {
 	readFloat64(offset: PointerLike): number;
 
 	toString(): string;
-	toArray(): Uint16Array;
+	toArray(): Uint8Array;
 }

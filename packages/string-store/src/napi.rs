@@ -2,6 +2,7 @@ use napi::{JsError, bindgen_prelude::Uint8Array};
 
 use crate::{Deserializer, Serializer};
 
+#[allow(dead_code)]
 #[napi]
 fn serialize(schema: Uint8Array, buffer: Uint8Array) -> Result<String, JsError> {
   let serializer = Serializer::new(schema.to_vec());
@@ -10,6 +11,7 @@ fn serialize(schema: Uint8Array, buffer: Uint8Array) -> Result<String, JsError> 
     .map_err(|err| JsError::from(anyhow::Error::msg(err)))
 }
 
+#[allow(dead_code)]
 #[napi]
 fn deserialize(schema: Uint8Array, buffer: Uint8Array) -> Result<Uint8Array, JsError> {
   let deserializer = Deserializer::new(schema.to_vec());

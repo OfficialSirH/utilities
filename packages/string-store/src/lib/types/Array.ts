@@ -8,13 +8,13 @@ export function ArrayType<ValueType, ValueBitSize extends number | null>(type: I
 				throw new TypeError(`Expected an array, got ${values}`);
 			}
 
-			buffer.writeInt16(values.length);
+			buffer.writeInt8(values.length);
 			for (const value of values) {
 				type.serialize(buffer, value);
 			}
 		},
 		deserialize(buffer, pointer) {
-			const length = buffer.readUint16(pointer);
+			const length = buffer.readUint8(pointer);
 			const value = [];
 			for (let i = 0; i < length; i++) {
 				value.push(type.deserialize(buffer, pointer));

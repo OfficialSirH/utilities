@@ -1,4 +1,6 @@
+import { deserialize as nativeDeserialize, serialize as nativeSerialize } from '../../../index';
 import type { DuplexBuffer } from '../buffer/DuplexBuffer';
+import { SchemaBuffer } from '../buffer/SchemaBuffer';
 import { UnalignedUint16Array } from '../buffer/UnalignedUint16Array';
 import { Pointer, type PointerLike } from '../shared/Pointer';
 import { t, type IType } from '../types/index';
@@ -6,7 +8,7 @@ import { t, type IType } from '../types/index';
 export class Schema<Id extends number = number, Entries extends object = object> {
 	readonly #id: Id;
 	readonly #types = new Map<string, IType<any, number | null>>();
-	#bitSize: number | null = 0;
+	#bitSize: number | null = 8; // Start with 8 bits for the schema ID
 
 	/**
 	 * Creates a new schema.
@@ -45,7 +47,7 @@ export class Schema<Id extends number = number, Entries extends object = object>
 	 * the schema will also be `null`.
 	 */
 	public get totalBitSize(): number | null {
-		return this.#bitSize === null ? null : this.#bitSize + 16;
+		return this.#bitSize === null ? null : this.#bitSize;
 	}
 
 	/**
@@ -73,8 +75,9 @@ export class Schema<Id extends number = number, Entries extends object = object>
 	 *
 	 * @seealso This method calls {@link Schema.serializeRaw} before calling `toString()` to its result.
 	 */
-	public serialize(value: Readonly<SerializeValueEntries<Entries>>, defaultMaximumArrayLength = 100): string {
-		return this.serializeRaw(value, defaultMaximumArrayLength).toString();
+	public serialize(value: Readonly<SerializeValueEntries<Entries>>, defaultMaximumArrayLength = 400): string {
+		const buffer = this.serializeRaw(value, defaultMaximumArrayLength);
+		return nativeSerialize(buffer.schemaBitSizes, buffer.toArray());
 	}
 
 	/**
@@ -82,10 +85,10 @@ export class Schema<Id extends number = number, Entries extends object = object>
 	 *
 	 * @param value The value to serialize into the buffer
 	 * @param defaultMaximumArrayLength The default maximum array length, if any
-	 * @returns The newly created buffer.
+	 * @returns The actual bit size for all of the serialized data and the newly created buffer.
 	 */
-	public serializeRaw(value: Readonly<SerializeValueEntries<Entries>>, defaultMaximumArrayLength = 100): DuplexBuffer {
-		const buffer = new UnalignedUint16Array(this.totalBitSize ?? defaultMaximumArrayLength);
+	public serializeRaw(value: Readonly<SerializeValueEntries<Entries>>, defaultMaximumArrayLength = 400): SchemaBuffer {
+		const buffer = new SchemaBuffer(this.#bitSize ?? defaultMaximumArrayLength);
 		this.serializeInto(buffer, value);
 		return buffer;
 	}
@@ -101,8 +104,8 @@ export class Schema<Id extends number = number, Entries extends object = object>
 	 * The schema's ID is written to the buffer first, followed by each property
 	 * in the schema.
 	 */
-	public serializeInto(buffer: DuplexBuffer, value: Readonly<SerializeValueEntries<Entries>>): void {
-		buffer.writeInt16(this.#id);
+	public serializeInto(buffer: SchemaBuffer, value: Readonly<SerializeValueEntries<Entries>>): void {
+		buffer.writeInt8(this.#id);
 		for (const [name, type] of this) {
 			(type as IType<any, number | null>).serialize(buffer, (value as any)[name]);
 		}
@@ -128,6 +131,7 @@ export class Schema<Id extends number = number, Entries extends object = object>
 			// @ts-expect-error Complex types
 			result[name] = type.deserialize(buffer, pointer);
 		}
+		nativeDeserialize(buffer);
 		return result;
 	}
 
