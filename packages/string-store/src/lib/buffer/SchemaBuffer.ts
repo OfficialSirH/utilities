@@ -1,3 +1,4 @@
+import type { Schema } from '../schema/Schema';
 import { Pointer, type PointerLike } from '../shared/Pointer';
 import type { DuplexBuffer } from './DuplexBuffer';
 
@@ -31,6 +32,10 @@ export class SchemaBuffer implements DuplexBuffer {
 
 	public get schemaBitSizes(): Uint8Array {
 		return new Uint8Array(this.#schemaBitSizes);
+	}
+
+	public prefixDynamicData(): void {
+		this.#schemaBitSizes.push(0);
 	}
 
 	public writeBit(value: number): void {
@@ -254,7 +259,7 @@ export class SchemaBuffer implements DuplexBuffer {
 		return new Uint8Array(this.#bufferView.buffer, 0, this.length);
 	}
 
-	public static from(value: string | DuplexBuffer): DuplexBuffer {
+	public static from(schema: Schema, value: string | DuplexBuffer): DuplexBuffer {
 		if (typeof value !== 'string') return value;
 
 		const buffer = new SchemaBuffer(value.length);

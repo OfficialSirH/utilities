@@ -14,8 +14,9 @@ fn serialize(schema: Uint8Array, buffer: Uint8Array) -> Result<String, JsError> 
 #[allow(dead_code)]
 #[napi]
 fn deserialize(schema: Uint8Array, buffer: Uint8Array) -> Result<Uint8Array, JsError> {
-  let deserializer = Deserializer::new(schema.to_vec());
+  let mut deserializer = Deserializer::new(schema.to_vec());
   deserializer
+    .map_err(|err| JsError::from(anyhow::Error::msg(err)))?
     .deserialize(buffer.to_vec())
     .and_then(|data| Ok(Uint8Array::from(data)))
     .map_err(|err| JsError::from(anyhow::Error::msg(err)))

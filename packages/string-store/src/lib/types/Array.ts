@@ -8,6 +8,7 @@ export function ArrayType<ValueType, ValueBitSize extends number | null>(type: I
 				throw new TypeError(`Expected an array, got ${values}`);
 			}
 
+			buffer.prefixDynamicData();
 			buffer.writeInt8(values.length);
 			for (const value of values) {
 				type.serialize(buffer, value);

@@ -7,6 +7,8 @@ export interface DuplexBuffer {
 	get length(): number;
 	get bitLength(): number;
 
+	prefixDynamicData(): void;
+
 	writeBit(value: number): void;
 	writeInt2(value: number): void;
 	writeInt4(value: number): void;

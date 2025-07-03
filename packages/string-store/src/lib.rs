@@ -5,15 +5,25 @@ extern crate napi_derive;
 
 mod char_byte_segment;
 mod constants;
+mod data_kind;
 mod data_requirement;
 mod deserializer;
+mod handler;
 mod napi;
+mod nullable;
+mod schema;
+mod schema_parser;
 mod serializer;
 
 pub use char_byte_segment::CharByteSegment;
 pub use constants::{BITS_IN_CONTINUATION_BYTES, CHAR_BIT_SPACE, CHAR_SIZE};
+pub use data_kind::DataKind;
 pub use data_requirement::get_data_requirement;
 pub use deserializer::Deserializer;
+pub use handler::Handler;
+pub use nullable::Nullable;
+pub use schema::Schema;
+pub use schema_parser::parse_schema;
 pub use serializer::Serializer;
 
 #[cfg(test)]
@@ -41,7 +51,7 @@ mod tests {
     let four_byte_char =
       String::from_utf8(vec![0b11110010, 0b10111111, 0b10100000, 0b10000000]).unwrap();
 
-    let deserializer = Deserializer::new(vec![8]);
+    let mut deserializer = Deserializer::new(vec![8]).unwrap();
     let result = deserializer.deserialize(four_byte_char.as_bytes().to_vec());
     if let Err(message) = result {
       println!("{message}");
@@ -82,7 +92,7 @@ mod tests {
         .collect::<Vec<String>>()
         .join(" ")
     );
-    let deserializer = Deserializer::new(schema);
+    let mut deserializer = Deserializer::new(schema).unwrap();
     let deserialized_data = deserializer.deserialize(serialized_data.as_bytes().to_vec());
 
     if let Err(message) = deserialized_data {
@@ -135,7 +145,8 @@ mod tests {
 
     println!("serialized_data: {}", serialized_data);
 
-    let deserializer = Deserializer::new([vec![8], [8].repeat(5), [8].repeat(19)].concat());
+    let mut deserializer =
+      Deserializer::new([vec![8], [8].repeat(5), [8].repeat(19)].concat()).unwrap();
     let deserialized_data = deserializer
       .deserialize(serialized_data.as_bytes().to_vec())
       .unwrap();
@@ -202,7 +213,7 @@ mod tests {
         .collect::<Vec<String>>()
     );
 
-    let deserializer = Deserializer::new(schema);
+    let mut deserializer = Deserializer::new(schema).unwrap();
     let deserialized_data = deserializer
       .deserialize(serialized_data.as_bytes().to_vec())
       .unwrap();

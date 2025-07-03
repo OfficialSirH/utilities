@@ -1,7 +1,6 @@
 import { deserialize as nativeDeserialize, serialize as nativeSerialize } from '../../../index';
 import type { DuplexBuffer } from '../buffer/DuplexBuffer';
 import { SchemaBuffer } from '../buffer/SchemaBuffer';
-import { UnalignedUint16Array } from '../buffer/UnalignedUint16Array';
 import { Pointer, type PointerLike } from '../shared/Pointer';
 import { t, type IType } from '../types/index';
 
@@ -124,7 +123,7 @@ export class Schema<Id extends number = number, Entries extends object = object>
 	 * from the buffer, that is reserved for the {@link SchemaStore}.
 	 */
 	public deserialize(buffer: DuplexBuffer | string, pointer: PointerLike): UnwrapSchemaEntries<Entries> {
-		buffer = UnalignedUint16Array.from(buffer);
+		buffer = SchemaBuffer.from(this as Schema, buffer);
 		pointer = Pointer.from(pointer);
 		const result = Object.create(null) as UnwrapSchemaEntries<Entries>;
 		for (const [name, type] of this) {
