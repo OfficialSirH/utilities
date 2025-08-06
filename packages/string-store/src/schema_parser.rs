@@ -1,8 +1,8 @@
 use std::slice::Iter;
 
-use crate::DataKind;
+use crate::{DataKind, Schema};
 
-pub fn parse_schema(schema: &[u8]) -> Result<Vec<DataKind>, &'static str> {
+pub fn parse_schema(schema: &[u8]) -> Result<Schema, &'static str> {
   let mut parsed_schema = Vec::new();
 
   let mut schema_iterator = schema.iter();
@@ -10,7 +10,7 @@ pub fn parse_schema(schema: &[u8]) -> Result<Vec<DataKind>, &'static str> {
     parsed_schema.push(parse_kind(&mut schema_iterator, *value, false)?);
   }
 
-  return Ok(parsed_schema);
+  return Ok(Schema::new(parsed_schema));
 }
 
 pub fn parse_kind(
@@ -20,20 +20,6 @@ pub fn parse_kind(
 ) -> Result<DataKind, &'static str> {
   let data = DataKind::try_from(value)?;
   match data {
-    // DataKind::Nullable(_) => {
-    //   if recursive {
-    //     return Err("Nullable within Nullable isn't allowed");
-    //   }
-    //   let value_type = *schema_iterator
-    //     .next()
-    //     .ok_or("Missing data type for nullable.")?;
-
-    //   Ok(DataKind::Nullable(Box::new(parse_kind(
-    //     schema_iterator,
-    //     value_type,
-    //     true,
-    //   )?)))
-    // }
     DataKind::Nullable | DataKind::Dynamic => Ok(data),
     DataKind::Normal(_) => {
       let bit_size = *schema_iterator

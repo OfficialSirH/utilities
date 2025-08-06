@@ -5,26 +5,26 @@ extern crate napi_derive;
 
 mod char_byte_segment;
 mod constants;
+mod data_buffer;
 mod data_kind;
 mod data_requirement;
 mod deserializer;
-mod handler;
 mod napi;
-mod nullable;
 mod schema;
 mod schema_parser;
 mod serializer;
+mod utf8_char;
 
 pub use char_byte_segment::CharByteSegment;
 pub use constants::{BITS_IN_CONTINUATION_BYTES, CHAR_BIT_SPACE, CHAR_SIZE};
+pub use data_buffer::DataBuffer;
 pub use data_kind::DataKind;
 pub use data_requirement::get_data_requirement;
 pub use deserializer::Deserializer;
-pub use handler::Handler;
-pub use nullable::Nullable;
 pub use schema::Schema;
 pub use schema_parser::parse_schema;
 pub use serializer::Serializer;
+pub use utf8_char::UTF8Char;
 
 #[cfg(test)]
 mod tests {

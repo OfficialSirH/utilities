@@ -1,9 +1,7 @@
-use crate::{Handler, constants::BYTE};
+use crate::constants::BYTE;
 
+#[derive(PartialEq)]
 pub enum DataKind {
-  // TODO: maybe I should have the schema expect a DataKind following Nullable
-  // rather than boxxing it within Nullable
-  // Nullable(Box<DataKind>),
   Nullable,
   // contains bit size of data type
   Normal(u8),
@@ -21,6 +19,10 @@ impl DataKind {
       DataKind::Fixed(byte_length) => (*byte_length * BYTE, BYTE - 1),
     }
   }
+
+  pub fn get_size(&self) -> u8 {
+    self.get_bits_n_offset().0
+  }
 }
 
 impl TryFrom<u8> for DataKind {
@@ -35,6 +37,17 @@ impl TryFrom<u8> for DataKind {
       _ => {
         Err("Unknown data type received. Expected: [0(Nullable), 1(Normal), 2(Fixed), 3(Dynamic)]")
       }
+    }
+  }
+}
+
+impl From<DataKind> for u8 {
+  fn from(value: DataKind) -> Self {
+    match value {
+      DataKind::Nullable => 0,
+      DataKind::Normal(_) => 1,
+      DataKind::Fixed(_) => 2,
+      DataKind::Dynamic => 3,
     }
   }
 }
